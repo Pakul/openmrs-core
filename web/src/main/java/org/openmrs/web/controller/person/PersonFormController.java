@@ -61,6 +61,7 @@ import org.springframework.web.bind.ServletRequestUtils;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.SimpleFormController;
 import org.springframework.web.servlet.view.RedirectView;
+import org.openmrs.messagesource.MessageSourceService;
 
 /**
  * This class controls the generic person properties (address, name, attributes). The Patient and
@@ -818,7 +819,7 @@ public class PersonFormController extends SimpleFormController {
 	 * @return
 	 */
 	public static boolean areRequiredAddressFieldsFilled(PersonAddress pa, Errors errors) {
-		String xml = Context.getLocationService().getAddressTemplate();
+		String xml = Context.getLocationService().getAddressTemplate();		MessageSourceService mss = Context.getMessageSourceService();
 		List<String> requiredElements = new ArrayList<String>();
 		
 		try {
@@ -836,16 +837,16 @@ public class PersonFormController extends SimpleFormController {
 				Object value = PropertyUtils.getProperty(pa, fieldName);
 				if (StringUtils.isBlank((String) value)) {
 					//required field not found
-					errors.reject("Required address field " + fieldName + " is blank.");
+					errors.reject(mss.getMessage("reporting.requiredAddressFieldBlank", new Object[] { fieldName }, Context
+					        .getLocale()));
 				}
 			}
 			catch (Exception e) {
-				//wrong field declared in template
+				errors.reject(mss.getMessage("AddressTemplate.error.wrongFieldDeclarated"));
 			}
 		}
 		if (errors.hasErrors())
 			return false;
-		
 		return true;
 	}
 	
